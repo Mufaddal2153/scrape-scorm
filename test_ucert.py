@@ -8,7 +8,7 @@ class test_ucert():
 
     def get_ans(self, prompt):
 
-        os.environ['OPENAI_API_KEY'] = "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"
+        os.environ['OPENAI_API_KEY'] = ""
         openai.api_key = os.environ['OPENAI_API_KEY']
 
         ans = openai.ChatCompletion.create(
