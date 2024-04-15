@@ -40,22 +40,20 @@ class main_login():
     
     def pass_final_quiz(self, driver, count):
         try:
-            driver.find_element(By.ID, 'final-quiz').click()
-            time.sleep(3)
-            driver.find_elements(By.CLASS_NAME, 'answer-list-item')[0].click()
-            time.sleep(2)
-            driver.find_element(By.ID, 'finish_quiz').click()
-            question = driver.find_element(By.CLASS_NAME, 'question-heading').text
-            print(question)
-            options = driver.find_elements(By.CLASS_NAME, 'answer-list-item')
-            options_list = []
-            for option in options:
-                option_value = option.text
-                option_key = option.find_element(By.TAG_NAME, 'label').get_property("content")
-                print("options")
-                print(option_key, option_value)
-                key, value = option_value.split()[0], " ".join(option_value.split()[1:])
-                options_list.append((key, key+") "+value))
+            for i in range(1, count+1):
+                question = driver.find_element(By.CLASS_NAME, 'question-heading').text
+                options = driver.find_elements(By.CLASS_NAME, 'answer-list-item')
+                options_list = []
+                for i, option in enumerate(options):
+                    option_value = option.text
+                    # get content from label ::after pseudo element
+                    # option_key = option.find_element(By.TAG_NAME, 'label').value_of_css_property("content")
+                    option_key = driver.execute_script("return window.getComputedStyle(document.querySelector('.answer-list-item:nth-child("+str(i+1)+") label'), ':after').getPropertyValue('content')").strip().replace('"', '')
+                    # option_key = option.find_element(By.TAG_NAME, 'label').get_property("content")
+                    print("options")
+                    print(option_key, option_value)
+                    key, value = option_value.split()[0], " ".join(option_value.split()[1:])
+                    options_list.append((key, key+") "+value))
         except NoSuchElementException as e:
             print("No such element")
         time.sleep(2)
@@ -87,33 +85,37 @@ class main_login():
                         class_values = class_values.get_attribute("class") if class_values else []
                         if "QuizMainDiv" in class_values:
                             print("QuizMainDiv")
-                            driver.find_element(By.ID, 'lesson-quiz').click()
-                            time.sleep(5)
-                            count = driver.find_element(By.CLASS_NAME, 'question-count').text
-                            print(count)
-                            count = int(count.split()[-1].strip())
-                            print(count)
-                            driver = self.parse_quiz(driver, count)
-                        time.sleep(2)
-                        try:
-                            driver.find_element(By.ID, 'play_topic_slide').click()
-                        except NoSuchElementException as e:
-                            print("No such element play topic slide element found")
-
-                        if "QuizMainDiv2" in class_values:
-                            print("in QuizMainDiv2")
                             try:
                                 driver.find_element(By.ID, 'final-quiz').click()
+                                print("Final Quiz")
                                 time.sleep(3)
                                 count = driver.find_element(By.CLASS_NAME, 'question-count').text
                                 print(count)
                                 count = int(count.split()[-1].strip())
                                 print(count)
                                 driver = self.pass_final_quiz(driver, count)
-                                break
                             except NoSuchElementException as e:
-                                print("No such element next topic slide element found")
+                                print("No such element final quiz element found")
+                                pass
+                            try:
+                                print("In Lesson Quiz")
+                                driver.find_element(By.ID, 'lesson-quiz').click()
+                                time.sleep(5)
+                                count = driver.find_element(By.CLASS_NAME, 'question-count').text
+                                print(count)
+                                count = int(count.split()[-1].strip())
+                                print(count)
+                                driver = self.parse_quiz(driver, count)
+                            except NoSuchElementException as e:
+                                print("No such element lesson quiz element found")
+                                pass
                         time.sleep(2)
+                        try:
+                            driver.find_element(By.ID, 'play_topic_slide').click()
+                        except NoSuchElementException as e:
+                            print("No such element play topic slide element found")
+                            pass
+                        time.sleep(6)
                 except NoSuchElementException as e:
                     print("No such element play topic slide element found")
         except NoSuchElementException as e:
